@@ -1,4 +1,6 @@
 ﻿using MySql.Data.MySqlClient;
+using Org.BouncyCastle.Utilities.Collections;
+using Org.BouncyCastle.Utilities;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -8,6 +10,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using MySqlX.XDevAPI.Relational;
+using System.Drawing.Drawing2D;
 
 namespace note_taking_app
 {
@@ -25,61 +29,46 @@ namespace note_taking_app
 
         private void button1_Click(object sender, EventArgs e)
         {
+            
+        }
+
+        private void roundedButton2_Click(object sender, EventArgs e)
+        {
             runQuery();
         }
 
         private void runQuery()
         {
-            string query = richTextBox1.Text;
 
-            if (query == "")
-            {
-                MessageBox.Show("Insert a query");
-                return;
-            }
+            Random rnd = new Random();
+            int num = rnd.Next();
 
-            // Change the username, password and database according to your needs
-            // You can ignore the database option if you want to access all of them.
-            // 127.0.0.1 stands for localhost and the default port to connect.
+            string noteText = richTextBox2.Text;
+
+            DateTime currentDateTime = DateTime.Now;
+            string currDateTime = currentDateTime.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss");
+
+            string query = "INSERT INTO `notes`(`note_text`, `note_datetime`) VALUES('"+ noteText + "', '"+ currDateTime + "')";
+
+            
             string connectionString = "datasource=127.0.0.1;port=3306;username=root;password=;database=note_taking_app_db;";
-            // Your query,
             
 
-            // Prepare the connection
             MySqlConnection databaseConnection = new MySqlConnection(connectionString);
             MySqlCommand commandDatabase = new MySqlCommand(query, databaseConnection);
             commandDatabase.CommandTimeout = 60;
             MySqlDataReader reader;
 
-            // Let's do it !
             try
             {
-                // Open the database
                 databaseConnection.Open();
+                MySqlDataReader myReader = commandDatabase.ExecuteReader();
 
-                // Execute the query
-                reader = commandDatabase.ExecuteReader();
+                //MessageBox.Show(currDateTime.ToString());
 
-                // All succesfully executed, now do something
+                MessageBox.Show("Notita salvata cu succes!");
+                richTextBox2.Clear();
 
-                // IMPORTANT : 
-                // If your query returns result, use the following processor :
-
-                if (reader.HasRows)
-                {
-                    while (reader.Read())
-                    {
-                        // As our database, the array will contain : ID 0, FIRST_NAME 1,LAST_NAME 2, ADDRESS 3
-                        // Do something with every received database ROW
-                        string[] row = { reader.GetString(0), reader.GetString(1), reader.GetString(2) };
-                    }
-                }
-                else
-                {
-                    Console.WriteLine("No rows found.");
-                }
-
-                // Finally close the connection
                 databaseConnection.Close();
             }
             catch (Exception ex)
@@ -88,5 +77,17 @@ namespace note_taking_app
                 MessageBox.Show(ex.Message);
             }
         }
+
+        /*private void roundedButton1_Click(object sender, EventArgs e)
+        {
+            
+        }*/
+
+        private void note_taking_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        
     }
 }
