@@ -32,10 +32,14 @@
             this.monthCalendar1 = new System.Windows.Forms.MonthCalendar();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
             this.label1 = new System.Windows.Forms.Label();
+            this.editButton = new note_taking_app.classes.RoundedButton();
             this.roundedButton4 = new note_taking_app.classes.RoundedButton();
             this.roundedButton3 = new note_taking_app.classes.RoundedButton();
             this.roundedButton2 = new note_taking_app.classes.RoundedButton();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.addImageButton = new note_taking_app.classes.RoundedButton();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
             // richTextBox2
@@ -73,6 +77,20 @@
             this.label1.Size = new System.Drawing.Size(94, 13);
             this.label1.TabIndex = 6;
             this.label1.Text = "Aici scrieti notitele!";
+            // 
+            // editButton
+            // 
+            this.editButton.BackColor = System.Drawing.Color.MediumSlateBlue;
+            this.editButton.FlatAppearance.BorderSize = 0;
+            this.editButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.editButton.ForeColor = System.Drawing.Color.White;
+            this.editButton.Location = new System.Drawing.Point(405, 336);
+            this.editButton.Name = "editButton";
+            this.editButton.Size = new System.Drawing.Size(358, 65);
+            this.editButton.TabIndex = 7;
+            this.editButton.Text = "Edit";
+            this.editButton.UseVisualStyleBackColor = false;
+            this.editButton.Click += new System.EventHandler(this.editButton_Click);
             // 
             // roundedButton4
             // 
@@ -116,9 +134,34 @@
             this.roundedButton2.UseVisualStyleBackColor = false;
             this.roundedButton2.Click += new System.EventHandler(this.roundedButton2_Click);
             // 
+            // pictureBox1
+            // 
+            this.pictureBox1.Location = new System.Drawing.Point(769, 89);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(441, 437);
+            this.pictureBox1.TabIndex = 8;
+            this.pictureBox1.TabStop = false;
+            // 
+            // addImageButton
+            // 
+            this.addImageButton.BackColor = System.Drawing.Color.MediumSlateBlue;
+            this.addImageButton.FlatAppearance.BorderSize = 0;
+            this.addImageButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.addImageButton.ForeColor = System.Drawing.Color.White;
+            this.addImageButton.Location = new System.Drawing.Point(769, 12);
+            this.addImageButton.Name = "addImageButton";
+            this.addImageButton.Size = new System.Drawing.Size(441, 65);
+            this.addImageButton.TabIndex = 9;
+            this.addImageButton.Text = "Adauga imagine!";
+            this.addImageButton.UseVisualStyleBackColor = false;
+            this.addImageButton.Click += new System.EventHandler(this.addImageButton_Click);
+            // 
             // note_taking
             // 
-            this.ClientSize = new System.Drawing.Size(775, 538);
+            this.ClientSize = new System.Drawing.Size(1222, 538);
+            this.Controls.Add(this.addImageButton);
+            this.Controls.Add(this.pictureBox1);
+            this.Controls.Add(this.editButton);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.roundedButton4);
             this.Controls.Add(this.dataGridView1);
@@ -129,6 +172,7 @@
             this.Name = "note_taking";
             this.Load += new System.EventHandler(this.note_taking_Load);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -146,6 +190,9 @@
         private System.Windows.Forms.DataGridView dataGridView1;
         private classes.RoundedButton roundedButton4;
         private System.Windows.Forms.Label label1;
+        private classes.RoundedButton editButton;
+        private System.Windows.Forms.PictureBox pictureBox1;
+        private classes.RoundedButton addImageButton;
     }
 }
 

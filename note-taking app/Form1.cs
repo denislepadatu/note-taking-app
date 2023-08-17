@@ -3,12 +3,17 @@ using MySqlX.XDevAPI.Relational;
 using System;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Windows.Forms;
 
 namespace note_taking_app
 {
+    
     public partial class note_taking : Form
     {
+        string connectionString = "datasource=127.0.0.1;port=3306;username=root;password=;database=note_taking_app_db;pooling = false; convert zero datetime=True";
+
+        bool editing = false;
         public note_taking()
         {
             InitializeComponent();
@@ -22,7 +27,7 @@ namespace note_taking_app
 
         private void roundedButton2_Click(object sender, EventArgs e)
         {
-            runQuery();
+            runQueryInsert();
             PopulateDataGridView();
         }
 
@@ -32,7 +37,7 @@ namespace note_taking_app
             monthCalendar1.Visible = !monthCalendar1.Visible;
         }
 
-        private void runQuery()
+        private void runQueryInsert()
         {
 
             Random rnd = new Random();
@@ -50,41 +55,69 @@ namespace note_taking_app
 
             string noteText = richTextBox2.Text;
 
+            // Image injection
+            MemoryStream ms = new MemoryStream();
+            pictureBox1.Image.Save(ms, pictureBox1.Image.RawFormat);
+            byte[] img = ms.ToArray();
+
             //Insert query for notes
-            string query = "INSERT INTO `notes`(`note_text`, `note_datetime`) VALUES('"+ noteText + "', '"+ date1 + "')";
+            string query = "INSERT INTO `notes`(`note_text`, `note_datetime`, 'image') VALUES ('"+ noteText + "', '"+ date1 + "', '"+ img +"')";
 
             
-            string connectionString = "datasource=127.0.0.1;port=3306;username=root;password=;database=note_taking_app_db;";
+            //string connectionString = "datasource=127.0.0.1;port=3306;username=root;password=;database=note_taking_app_db;";
             MySqlConnection databaseConnection = new MySqlConnection(connectionString);
             MySqlCommand commandDatabase = new MySqlCommand(query, databaseConnection);
             commandDatabase.CommandTimeout = 60;
-            MySqlDataReader reader;
+            //MySqlDataReader reader;
 
-            try
+            if (editing)
             {
-                databaseConnection.Open();
-                MySqlDataReader myReader = commandDatabase.ExecuteReader();
-
-                //MessageBox.Show(currDateTime.ToString());
-
-                MessageBox.Show("Notita salvata cu succes!");
-
-                //reset the controls
-                richTextBox2.Clear();
-                monthCalendar1.Refresh();
-                monthCalendar1.RemoveAllBoldedDates();
-                monthCalendar1.Visible = false;
-
-                databaseConnection.Close();
-            }
-            catch (Exception ex)
-            {
-                //If no date is selected in the calendar
-                //insert the note and the current date and time
-                if (date1 == DateTime.Now.ToString("HH:mm"))
+                using (MySqlConnection connection = new MySqlConnection(connectionString))
                 {
-                    string query1 = "INSERT INTO `notes`(`note_text`, `note_datetime`) VALUES('" + noteText + "', '" + currentDateTime + "')";
+                    connection.Open();
 
+                    // Get the ID from the selected row in the DataGridView
+                    string selectedId = dataGridView1.Rows[dataGridView1.CurrentCell.RowIndex].Cells["Id"].Value.ToString();
+
+                    // Use parameterized query to prevent SQL injection
+                    string queryUpdate = "UPDATE `notes` SET `note_text` = @noteText WHERE `Id` = @selectedId";
+
+                    using (MySqlCommand command = new MySqlCommand(queryUpdate, connection))
+                    {
+                        // Add parameters to the query
+                        command.Parameters.AddWithValue("@noteText", noteText);
+                        command.Parameters.AddWithValue("@selectedId", selectedId);
+
+                        // Perform the update
+                        int rowsAffected = command.ExecuteNonQuery();
+
+                        if (rowsAffected > 0)
+                        {
+                            // Update successful
+                            MessageBox.Show("Update successful!");
+                            richTextBox2.Clear();
+                            monthCalendar1.Refresh();
+                            monthCalendar1.RemoveAllBoldedDates();
+                            monthCalendar1.Visible = false;
+                        }
+                        else
+                        {
+                            // Update failed
+                            MessageBox.Show("Update failed!");
+                            richTextBox2.Clear();
+                            monthCalendar1.Refresh();
+                            monthCalendar1.RemoveAllBoldedDates();
+                            monthCalendar1.Visible = false; 
+                        }
+                    }
+                }
+
+            }
+            else
+            {
+                try
+                {
+                    // If calendar date is selected
                     databaseConnection.Open();
                     MySqlDataReader myReader = commandDatabase.ExecuteReader();
 
@@ -99,12 +132,37 @@ namespace note_taking_app
                     monthCalendar1.Visible = false;
 
                     databaseConnection.Close();
-
                 }
+                catch (Exception ex)
+                {
+                    //If no date is selected in the calendar
+                    //insert the note and the current date and time
+                    if (date1 == DateTime.Now.ToString("HH:mm"))
+                    {
+                        string query1 = "INSERT INTO `notes`(`note_text`, `note_datetime`) VALUES('" + noteText + "', '" + currentDateTime + "')";
 
-                // Show any error message.
-                // MessageBox.Show(ex.Message);
+                        databaseConnection.Open();
+                        MySqlDataReader myReader = commandDatabase.ExecuteReader();
+
+                        //MessageBox.Show(currDateTime.ToString());
+
+                        MessageBox.Show("Notita salvata cu succes!");
+
+                        //reset the controls
+                        richTextBox2.Clear();
+                        monthCalendar1.Refresh();
+                        monthCalendar1.RemoveAllBoldedDates();
+                        monthCalendar1.Visible = false;
+
+                        databaseConnection.Close();
+
+                    }
+
+                    // Show any error message.
+                    // MessageBox.Show(ex.Message);
+                }
             }
+            
         }
  
 
@@ -116,12 +174,12 @@ namespace note_taking_app
 
         private void PopulateDataGridView()
         {
-            string connectionString = "datasource=127.0.0.1;port=3306;username=root;password=;database=note_taking_app_db;pooling = false; convert zero datetime=True";
+            //string connectionString = "datasource=127.0.0.1;port=3306;username=root;password=;database=note_taking_app_db;pooling = false; convert zero datetime=True";
 
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
                 connection.Open();
-                string query = "SELECT id, note_text AS Note, note_datetime as Date FROM notes";
+                string query = "SELECT id, note_text AS Note, note_datetime as Date, image AS Image FROM notes";
 
                 using (MySqlCommand command = new MySqlCommand(query, connection))
                 {
@@ -199,6 +257,38 @@ namespace note_taking_app
             }
         }
 
-        
+        private void editButton_Click(object sender, EventArgs e)
+        {
+            
+
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                connection.Open();
+                string query = "SELECT id, note_text AS Note, note_datetime as Date FROM notes";
+
+                using (MySqlCommand command = new MySqlCommand(query, connection))
+                {
+                    using (MySqlDataAdapter adapter = new MySqlDataAdapter(command))
+                    {
+                        DataTable dataTable = new DataTable();
+                        adapter.Fill(dataTable);
+                        //dataGridView1.DataSource = dataTable;
+                        richTextBox2.Text = dataTable.Rows[dataGridView1.CurrentCell.RowIndex].ItemArray[1].ToString();
+                        editing = true;
+                    }
+                }
+            }
+            
+        }
+
+        private void addImageButton_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog opf = new OpenFileDialog();
+            opf.Filter = "Choose image(*.jpg; *.png; *.gif)|*.jpg; *.png; *.gif";
+            if(opf.ShowDialog() == DialogResult.OK)
+            {
+                pictureBox1.Image = Image.FromFile(opf.FileName);
+            }
+        }
     }
 }
